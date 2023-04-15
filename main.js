@@ -1,12 +1,19 @@
-//npm install nodemon -g// para instalar nodemon al proyecto
-//nodemon +nombre de carpeta que quiero ejecutar, se ejecuta
+const express = require('express');
 
-const fs = require ('fs');// nuevo
+const PUERTO = 8080;
+
+const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
+
+
+const fs = require ('fs');
+
 
 class ProductManager {
 
     constructor() {
-        this.path = "./productos.txt";// nuevo
+        this.path = "./productos.txt";
         this.products = [];
         this.productIdCounter = 1;
     }
@@ -82,11 +89,19 @@ class ProductManager {
     
 
 const manager = new ProductManager();
-manager.addProducts('Pantalón Jeans', 'Pantalón de jeans chupin', 15000, 'img', 0001, 10);
+/* manager.addProducts('Pantalón Jeans', 'Pantalón de jeans chupin', 15000, 'img', 0001, 10);
 manager.addProducts('Pantalón Sastrero', 'Pantalón de vestir sastrero chupin', 15000,'img', 0002, 8);
-console.log(manager.getProducts());
+manager.addProducts('Camisa', 'Camisa estampada', 9000, 'img', 0003, 4);
+manager.addProducts('Remera', 'Remera de algodón', 4000, 'img', 0004, 15);
+manager.addProducts('Blusa', 'Blusa de seda lisa', 7000,'img', 0005, 6);
+manager.addProducts('Sweater', 'Sweater de lana liso', 12000, 'img', 0006, 5);
+manager.addProducts('Tapado', 'Tapado de gabardina liso', 50000, 'img', 0007, 2);
+manager.addProducts('Campera', 'Campera de cuero', 40000,'img', 0011, 3);
+manager.addProducts('Musculosa', 'Musculosa de algodón estampada', 6000, 'img', 0012, 9);
+manager.addProducts('Pollera', 'Pollera de jeans', 11000, 'img', 0010, 7); */
+//console.log(manager.getProducts());
 
-manager.getProductsById(8);
+/*manager.getProductsById(8);
 manager.getProductsById(1);  
 
 manager.deleteProductsById(1)
@@ -101,3 +116,24 @@ manager.updateProducts({
     stock: 8
 })
 
+*/
+
+app.get('/products', async(req, res) => {
+
+    let limit = parseInt(req.query.limit);
+    if (!limit) return res.send(await manager.readProducts())
+    let allProducts = await manager.readProducts();
+    let productLimit = allProducts.slice(0, limit);
+    res.send(productLimit);
+})
+
+app.get('/products/:id', async(req, res) => {
+    let id = parseInt(req.params.id);
+    let allProducts = await manager.readProducts();
+    let productsById = allProducts.find(product => product.id === id);
+    res.send(productsById);
+});  
+
+app.listen(PUERTO, () => {
+    console.log(`Servidor backend activo en puerto ${PUERTO}`);
+});
